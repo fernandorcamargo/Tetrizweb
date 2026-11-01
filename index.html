@@ -2,8 +2,18 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tetris Clássico</title>
+
+    <!-- Tela cheia quando aberto pelo ícone na tela de início -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tetris">
+    <meta name="theme-color" content="#121214">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
     <style>
         :root {
             --bg-color: #121214;
@@ -12,18 +22,28 @@
             --accent-color: #00b37e;
         }
 
+        html {
+            background-color: var(--bg-color);
+            height: 100%;
+            overscroll-behavior: none;
+        }
+
         body {
+            /* Ocupa a tela inteira, sem rolar, e respeita o notch e a barra inferior do iPhone */
+            position: fixed;
+            inset: 0;
             margin: 0;
-            padding: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             overflow: hidden;
+            overscroll-behavior: none;
             touch-action: manipulation;
             -webkit-user-select: none;
             user-select: none;
@@ -92,6 +112,8 @@
         }
 
         #next-canvas {
+            width: 80px;
+            height: 80px;
             background: #000;
             border: 2px solid #29292e;
             border-radius: 4px;
@@ -185,9 +207,10 @@
             .controls-hint {
                 display: none;
             }
+            /* No celular o campo usa todo o espaço disponível (largura ou altura, o que for menor) */
             #tetris {
-                height: min(480px, calc(100vh - 180px));
-                height: min(480px, calc(100dvh - 180px));
+                height: min(720px, calc((100vw - 140px) * 2), calc(100vh - 180px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+                height: min(720px, calc((100vw - 140px) * 2), calc(100dvh - 180px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
             }
         }
 
@@ -279,12 +302,18 @@
 
 <script>
     const canvas = document.getElementById('tetris');
+    // Desenha em alta resolução em telas Retina para os blocos ficarem nítidos
+    const pixelRatio = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
+    canvas.width = 240 * pixelRatio;
+    canvas.height = 480 * pixelRatio;
     const context = canvas.getContext('2d');
-    context.scale(20, 20); // Cada bloco tem 20x20 pixels
+    context.scale(20 * pixelRatio, 20 * pixelRatio); // Cada bloco tem 20x20 pixels
 
     const nextCanvas = document.getElementById('next-canvas');
+    nextCanvas.width = 80 * pixelRatio;
+    nextCanvas.height = 80 * pixelRatio;
     const nextContext = nextCanvas.getContext('2d');
-    nextContext.scale(20, 20);
+    nextContext.scale(20 * pixelRatio, 20 * pixelRatio);
 
     const scoreElement = document.getElementById('score');
     const highScoreElement = document.getElementById('high-score');
